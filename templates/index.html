@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Safaricom M-Pesa STK Push Payment</title>
+    <style>
+      /* Basic Reset & Body Styling */
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        background-color: #f4f7f6;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+        margin: 0;
+        color: #333;
+      }
+
+      /* Container for the form */
+      .form-container {
+        background-color: #ffffff;
+        padding: 30px;
+        border-radius: 10px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        width: 100%;
+        max-width: 450px;
+      }
+
+      /* Table Styling */
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-bottom: 20px;
+      }
+
+      th,
+      td {
+        padding: 12px 15px;
+        border: 1px solid #e0e0e0;
+        text-align: left;
+      }
+
+      th {
+        background-color: #f0f0f0;
+        font-size: 1.2rem;
+        color: #555;
+      }
+
+      td:first-child {
+        /* Label column */
+        width: 40%;
+        font-weight: bold;
+        color: #444;
+      }
+
+      /* Input Field Styling */
+      input[type="tel"],
+      input[type="number"] {
+        width: calc(100% - 20px); /* Account for padding */
+        padding: 10px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        font-size: 1rem;
+        box-sizing: border-box; /* Include padding in width */
+      }
+
+      input[type="tel"]:focus,
+      input[type="number"]:focus {
+        border-color: #007bff;
+        outline: none;
+        box-shadow: 0 0 5px rgba(0, 123, 255, 0.2);
+      }
+
+      /* Button Styling */
+      .button-container {
+        text-align: center;
+        padding-top: 10px;
+      }
+
+      button {
+        background-color: #28a745; /* Green */
+        color: white;
+        padding: 12px 25px;
+        border: none;
+        border-radius: 25px;
+        font-size: 1.1rem;
+        cursor: pointer;
+        transition: background-color 0.3s ease, transform 0.2s ease;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+      }
+
+      button:hover {
+        background-color: #218838; /* Darker green on hover */
+        transform: translateY(-2px); /* Slight lift effect */
+      }
+
+      button:active {
+        background-color: #1e7e34; /* Even darker on click */
+        transform: translateY(0); /* Return to original position */
+      }
+
+      button:disabled {
+        background-color: #cccccc; /* Grey out when disabled */
+        cursor: not-allowed;
+        box-shadow: none;
+        transform: none;
+      }
+
+      /* Message Display */
+      #message {
+        text-align: center;
+        margin-top: 20px;
+        font-weight: bold;
+      }
+
+      #message.success {
+        color: #28a745; /* Green for success */
+      }
+
+      #message.error {
+        color: #dc3545; /* Red for error */
+      }
+    </style>
+  </head>
+  <body>
+    <div class="form-container">
+      <table>
+        <thead>
+          <tr>
+            <th colspan="2">Safaricom M-Pesa Express (STK Push)</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><label for="phoneInput">Phone Number:</label></td>
+            <td>
+              <input
+                type="tel"
+                name="phoneInput"
+                id="phoneInput"
+                placeholder="e.g., 2547XXXXXXXX"
+                required
+              />
+            </td>
+          </tr>
+          <tr>
+            <td><label for="amountInput">Amount (KSH):</label></td>
+            <td>
+              <input
+                type="number"
+                name="amountInput"
+                id="amountInput"
+                placeholder="e.g., 100"
+                min="1"
+                required
+              />
+            </td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="button-container">
+        <button onclick="initiatePayment()">Pay Now</button>
+      </div>
+
+      <p id="message"></p>
+    </div>
+
+    <script>
+      /**
+       * Function to initiate the M-Pesa STK Push payment.
+       * This function handles client-side validation and sends the request to the backend.
+       */
+      function initiatePayment() {
+        // Get input values and message element
+        const phoneInput = document.getElementById("phoneInput").value.trim();
+        const amountInput = document.getElementById("amountInput").value.trim();
+        const messageElement = document.getElementById("message");
+        const payButton = document.querySelector("button");
+
+        // Clear previous messages and styling
+        messageElement.textContent = "";
+        messageElement.className = "";
+
+        // --- Client-Side Validation ---
+        if (!phoneInput || !amountInput) {
+          messageElement.classList.add("error");
+          messageElement.textContent =
+            "Please fill in both phone number and amount.";
+          return; // Stop execution if validation fails
+        }
+
+        // Validate phone number format (starts with 2547 or 2541, exactly 12 digits, all digits)
+        // This is crucial for M-Pesa.
+        if (!/^(2547|2541)\d{8}$/.test(phoneInput)) {
+          messageElement.classList.add("error");
+          messageElement.textContent =
+            "Please enter a valid Kenyan Safaricom phone number (e.g., 2547XXXXXXXX or 2541XXXXXXXX).";
+          return;
+        }
+
+        // Validate amount: must be a positive integer
+        const amount = parseInt(amountInput, 10);
+        if (isNaN(amount) || amount <= 0) {
+          messageElement.classList.add("error");
+          messageElement.textContent =
+            "Please enter a valid amount (must be a positive number).";
+          return;
+        }
+
+        // Disable the button to prevent multiple clicks while processing
+        payButton.disabled = true;
+        payButton.textContent = "Processing...";
+        messageElement.textContent = "Initiating payment... Please wait.";
+        messageElement.classList.add("success"); // Use success color for "processing"
+
+        // --- Send Data to Backend ---
+        // The /api/stkpush endpoint on your backend will handle the secure M-Pesa API calls.
+        fetch("/api/stkpush", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            phoneNumber: phoneInput,
+            amount: amount,
+          }),
+        })
+          .then((response) => {
+            // Check if the HTTP response itself was successful (status 2xx)
+            if (!response.ok) {
+              // Attempt to parse JSON error message from backend
+              return response
+                .json()
+                .then((err) => {
+                  const errorMessage =
+                    err.message ||
+                    `Backend error: HTTP Status ${response.status}`;
+                  throw new Error(errorMessage);
+                })
+                .catch(() => {
+                  // Fallback for non-JSON error responses
+                  throw new Error(
+                    `Backend error: HTTP Status ${response.status}`
+                  );
+                });
+            }
+            // If response is OK, parse the JSON body
+            return response.json();
+          })
+          .then((data) => {
+            // Process the JSON response from your backend
+            if (data.success) {
+              messageElement.classList.remove("error");
+              messageElement.classList.add("success");
+              messageElement.textContent =
+                data.message ||
+                "STK Push initiated successfully! Check your phone for the M-Pesa prompt.";
+            } else {
+              messageElement.classList.remove("success");
+              messageElement.classList.add("error");
+              messageElement.textContent =
+                data.message || "STK Push initiation failed. Please try again.";
+            }
+          })
+          .catch((error) => {
+            // Catch any network errors or errors thrown from the .then() block
+            console.error("Frontend Fetch Error:", error);
+            messageElement.classList.remove("success");
+            messageElement.classList.add("error");
+            messageElement.textContent = `An error occurred: ${error.message}. Please try again.`;
+          })
+          .finally(() => {
+            // Always re-enable the button after the fetch request completes
+            payButton.disabled = false;
+            payButton.textContent = "Pay Now";
+          });
+      }
+    </script>
+  </body>
+</html>
