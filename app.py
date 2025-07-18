@@ -19,21 +19,9 @@ load_dotenv()
 # --- M-Pesa API Configuration ---
 # Retrieve credentials and configurations securely from environment variables.
 # **IMPORTANT**: In a production environment, ensure these are loaded directly
-# from your server's environment, not just from a .env file.
-CONSUMER_KEY = os.getenv("1bvBpyAQdFgnAxVgrPOoE0wNlnqdgqmTGw2ifirVgeG0gscJ")
-CONSUMER_SECRET = os.getenv("hu1EnuMQO4asAmvwqRn65c5OZwDqTnYAz9hA5NQaL0GopQQOAkuJjRhGWFtOAiak")
-PASSKEY = os.getenv("bfb279f9aa9bdbcf158e97dd71a467cd2e0c893059b10f78e6b72ada1ed2c919")
-BUSINESS_SHORT_CODE = os.getenv("174379")
-CALLBACK_URL = os.getenv("www.render.com/api/mpesa_callback")
+# from your server's environment, not just from a .env
 
-# Safaricom API Endpoints (use production URLs for live environment)
-OAUTH_URL = os.getenv("https://sandbox.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials")
-STKPUSH_URL = os.getenv("https://sandbox.safaricom.co.ke/mpesa/stkpush/v1/processrequest")
-
-# Transaction details that might be constant for your application
-TRANSACTION_TYPE = os.getenv("MPESA_TRANSACTION_TYPE", "CustomerPayBillOnline")
-ACCOUNT_REFERENCE = os.getenv("MPESA_ACCOUNT_REFERENCE", "DefaultAccountRef")
-TRANSACTION_DESC = os.getenv("MPESA_TRANSACTION_DESC", "DefaultTransactionDesc")
+# Transaction details that 
 
 # Basic check to ensure all critical environment variables are loaded
 if not all([CONSUMER_KEY, CONSUMER_SECRET, PASSKEY, BUSINESS_SHORT_CODE, CALLBACK_URL, OAUTH_URL, STKPUSH_URL]):
